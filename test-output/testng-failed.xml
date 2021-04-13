@@ -3,13 +3,15 @@
 <suite name="Failed suite [Default suite]" guice-stage="DEVELOPMENT">
   <test thread-count="5" name="Default test(failed)">
     <classes>
-      <class name="com.cts.training.RegistrationCSVData">
+      <class name="com.cts.training.Login">
         <methods>
           <include name="intiDriver"/>
+          <include name="quit"/>
           <include name="quitDriver"/>
-          <include name="registerPersonalUser" invocation-numbers="0 1 2"/>
+          <include name="init"/>
+          <include name="userLogin" invocation-numbers="0 1"/>
         </methods>
-      </class> <!-- com.cts.training.RegistrationCSVData -->
+      </class> <!-- com.cts.training.Login -->
     </classes>
   </test> <!-- Default test(failed) -->
 </suite> <!-- Failed suite [Default suite] -->

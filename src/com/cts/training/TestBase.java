@@ -2,6 +2,7 @@ package com.cts.training;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
@@ -10,36 +11,50 @@ import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.edge.EdgeDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Optional;
+import org.testng.annotations.Parameters;
+
+import com.aventstack.extentreports.ExtentReports;
+import com.aventstack.extentreports.ExtentTest;
+import com.aventstack.extentreports.Status;
+import com.cts.training.utils.ExtentManager;
 
 public class TestBase {
 
-	static WebDriver driver = null;
-	static WebDriverWait wait = null;
-	public static final String PROJECT_DIR = System.getProperty("user.dir");
+	protected WebDriver driver = null;
+	protected WebDriverWait wait = null;
 
-	public static void createDriver(String browser) {
-		if (browser.equalsIgnoreCase("edge")) {
-			System.setProperty("webdriver.edge.driver", PROJECT_DIR + "\\drivers\\msedgedriver.exe");
-			driver = new EdgeDriver();
-		} else if (browser.equalsIgnoreCase("firefox")) {
-			System.setProperty("webdriver.gecko.driver", PROJECT_DIR + "\\drivers\\geckodriver.exe");
-			driver = new FirefoxDriver();
-		} else {
-			System.setProperty("webdriver.chrome.driver", PROJECT_DIR + "\\drivers\\chromedriver.exe");
-			driver = new ChromeDriver();
-		}
+	ExtentTest test;
+	ExtentReports reports;
+
+	@BeforeMethod
+	public void init(Method method) {
+		String testName = method.getName();
+		System.out.println(testName + "executing");
+		reports = ExtentManager.getReports();
+		test = reports.createTest(testName);
 	}
 
-	static WebElement getElement(String locator, String locatorValue) {
+	@AfterMethod
+	public void quit() {
+		reports.flush();
+	}
+
+	public void createDriver(String browser) {
+		BrowserFactory browserFactory = new BrowserFactory(browser);
+		driver = browserFactory.createDriver();
+	}
+
+	WebElement getElement(String locator, String locatorValue) {
 		WebElement element = null;
+		test.log(Status.INFO, "finding element " + locator + ":" + locatorValue);
 		if (locator.equalsIgnoreCase("css")) {
 			element = driver.findElement(By.cssSelector(locatorValue));
 		} else if (locator.equalsIgnoreCase("xpath")) {
@@ -48,7 +63,8 @@ public class TestBase {
 		return element;
 	}
 
-	static void enterText(String locator, String locatorValue, String text) {
+	void enterText(String locator, String locatorValue, String text) {
+
 		WebElement element = getElement(locator, locatorValue);
 		if (element.isDisplayed()) {
 			System.out.println("entering text: " + text);
@@ -58,7 +74,7 @@ public class TestBase {
 		}
 	}
 
-	static void clickElement(String locator, String locatorValue) {
+	void clickElement(String locator, String locatorValue) {
 		WebElement element = getElement(locator, locatorValue);
 		if (element.isEnabled()) {
 			element.click();
@@ -67,7 +83,7 @@ public class TestBase {
 		}
 	}
 
-	static void selectDropDownValue(String locator, String locatorValue, String text) {
+	void selectDropDownValue(String locator, String locatorValue, String text) {
 		WebElement element = getElement(locator, locatorValue);
 		if (element.isEnabled()) {
 			element.click();
@@ -78,25 +94,27 @@ public class TestBase {
 		selectValue.selectByVisibleText(text);
 	}
 
-	static void waitUntilElementVisible(String locator, String locatorValue) {
+	void waitUntilElementVisible(String locator, String locatorValue) {
 		WebElement element = getElement(locator, locatorValue);
 		wait = new WebDriverWait(driver, 10);
 		wait.until(ExpectedConditions.visibilityOf(element));
 
 	}
 
-	public static void getScreenshot(String fileName) {
+	public void getScreenshot(String fileName) {
 		File scrFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
 		try {
-			FileUtils.copyFile(scrFile, new File(PROJECT_DIR + "\\screenshots\\" + fileName + ".jpg"));
+			FileUtils.copyFile(scrFile, new File(BrowserFactory.PROJECT_DIR + "\\screenshots\\" + fileName + ".jpg"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
+	@Parameters("browser")
 	@BeforeClass
-	public void intiDriver() {
-		createDriver("chrome");
+	public void intiDriver(@Optional("chrome") String browser) {
+		BrowserFactory browserFactory = new BrowserFactory(browser);
+		driver = browserFactory.createDriver();
 		driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
 
 	}
@@ -108,4 +126,5 @@ public class TestBase {
 			driver = null;
 		}
 	}
+
 }

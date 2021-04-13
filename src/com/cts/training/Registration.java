@@ -50,7 +50,7 @@ public class Registration extends TestBase {
 		uPassword.sendKeys(password);
 	}
 
-	@Test(dataProvider = "businessData", enabled = false)
+	@Test(dataProvider = "businessData", enabled = true)
 	public void registerBusinessUser(String name, String email, String password, String location)
 			throws InterruptedException {
 		driver.get("https://www.ebay.com");
@@ -80,7 +80,7 @@ public class Registration extends TestBase {
 
 	@DataProvider(name = "xlsRegisterData")
 	public String[][] getXlsData() throws IOException {
-		String path = PROJECT_DIR + "\\testdata\\ebay_login.xls";
+		String path = BrowserFactory.PROJECT_DIR + "\\testdata\\ebay_login.xls";
 		XLSReader xlsReader = new XLSReader(path);
 		int totalRows = xlsReader.getRowCount("personalUser");
 		int totalCols = xlsReader.getCellCount("personalUser", 0);

@@ -43,7 +43,7 @@ public class RegistrationCSVData extends TestBase {
 		// Data
 		String firstname = testData.get("firstname");
 		String lastname = testData.get("lastname");
-		String username = testData.get("username");
+		String username = testData.get("email");
 		String password = testData.get("password");
 
 		System.out.println(firstname + lastname + username + password);
@@ -59,7 +59,8 @@ public class RegistrationCSVData extends TestBase {
 
 	@DataProvider(name = "csvData")
 	Iterator<Object[]> getCSVData() {
-		String filePath = PROJECT_DIR + File.separator + "testdata" + File.separator + "ebay_register.csv";
+		String filePath = BrowserFactory.PROJECT_DIR + File.separator + "testdata" + File.separator
+				+ "ebay_register.csv";
 		CSVDataReader csvData = new CSVDataReader(filePath);
 		return csvData.readCSVData();
 
